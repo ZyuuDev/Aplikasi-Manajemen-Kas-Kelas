@@ -7,6 +7,8 @@ import '../providers/class_provider.dart';
 import '../theme.dart';
 import 'batch_payment_screen.dart';
 import 'expense_form_screen.dart';
+import 'expense_history_screen.dart';
+import 'special_collections_screen.dart';
 import 'student_management_screen.dart';
 import 'login_screen.dart';
 
@@ -266,6 +268,13 @@ class DashboardScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(LucideIcons.refreshCw, color: AppTheme.primaryEmerald, size: 20),
+            tooltip: 'Segarkan Data',
+            onPressed: () {
+              ref.read(classProvider.notifier).loadClassData();
+            },
+          ),
+          IconButton(
             icon: const Icon(LucideIcons.logOut, color: AppTheme.textMuted),
             onPressed: () {
               Navigator.pushReplacement(
@@ -276,11 +285,17 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: RefreshIndicator(
+        color: AppTheme.primaryEmerald,
+        backgroundColor: AppTheme.darkCard,
+        onRefresh: () => ref.read(classProvider.notifier).loadClassData(),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
             // Row 1: Dashboard Metrics Card
             Card(
               child: Container(
@@ -378,8 +393,24 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 _buildActionButton(
                   context: context,
-                  icon: LucideIcons.users,
+                  icon: LucideIcons.clipboardList,
+                  color: const Color(0xFF8B5CF6),
+                  title: 'Iuran Khusus',
+                  subtitle: 'LKS, Study Tour, dll',
+                  target: const SpecialCollectionsScreen(),
+                ),
+                _buildActionButton(
+                  context: context,
+                  icon: LucideIcons.fileText,
                   color: Colors.blueAccent,
+                  title: 'Riwayat Keluar',
+                  subtitle: 'Histori pengeluaran',
+                  target: const ExpenseHistoryScreen(),
+                ),
+                _buildActionButton(
+                  context: context,
+                  icon: LucideIcons.users,
+                  color: const Color(0xFF06B6D4),
                   title: 'Data Siswa',
                   subtitle: 'Nagih & Blast WA',
                   target: const StudentManagementScreen(),
@@ -591,7 +622,8 @@ class DashboardScreen extends ConsumerWidget {
                 },
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
