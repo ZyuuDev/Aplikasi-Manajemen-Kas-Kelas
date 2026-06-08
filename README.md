@@ -1,156 +1,90 @@
-# Aplikasi Manajemen Kas Kelas
+# SakuKelas Bendahara (Aplikasi Mobile)
 
-Aplikasi ini adalah proyek Flutter untuk membantu mengelola kas kelas secara lebih rapi, cepat, dan transparan. Dengan aplikasi ini, pengguna dapat mencatat pemasukan, pengeluaran, saldo kas, dan riwayat transaksi dalam satu tempat.
+SakuKelas Bendahara adalah aplikasi mobile berbasis **Flutter** yang dirancang khusus sebagai "Pusat Kendali" bagi Bendahara Kelas untuk mengelola uang kas kelas secara lebih cepat, terstruktur, dan transparan. 
 
-> Proyek ini dibangun menggunakan Flutter dan Dart, sehingga dapat dikembangkan menjadi aplikasi Android, iOS, web, maupun desktop sesuai kebutuhan.
+Aplikasi ini memiliki hak akses penuh (**CRUD**) untuk mengelola data siswa, mencatat iuran kas masuk, serta mengunggah bukti pengeluaran langsung menggunakan kamera perangkat.
 
-## Tujuan Proyek
+---
 
-Tujuan utama dari aplikasi ini adalah:
+## 🚀 Fitur Utama
 
-- memudahkan pengelolaan uang kas kelas,
-- mengurangi pencatatan manual di buku,
-- membantu bendahara kelas melihat data keuangan dengan jelas,
-- menjaga transparansi pemasukan dan pengeluaran,
-- meminimalkan kesalahan pencatatan.
+- **Dashboard Keuangan:** Menampilkan ringkasan total saldo, pemasukan, dan pengeluaran secara real-time.
+- **Manajemen Siswa:** Menambah, memperbarui, atau menonaktifkan data siswa dalam kelas.
+- **Pencatatan Pemasukan (Batch & Custom):**
+  - *Batch Checklist:* Pembayaran kas massal dengan mencentang nama siswa untuk pelunasan cepat.
+  - *Custom Amount:* Mencatat pembayaran iuran dengan nominal kustom untuk siswa yang mencicil.
+- **Pencatatan Pengeluaran & Bukti Nota:**
+  - Input transaksi pengeluaran lengkap dengan kategori dan deskripsi.
+  - Integrasi kamera untuk memfoto nota/struk pengeluaran dan mengunggahnya langsung ke server.
+- **Pengingat Tunggakan (WhatsApp Blast):** Mengirim pesan penagihan otomatis ke nomor WhatsApp siswa yang memiliki tunggakan iuran.
+- **Tutup Buku (Reset Semester):** Menyimpan riwayat transaksi semester lalu, serta melakukan reset saldo dan tunggakan untuk memulai semester baru tanpa kehilangan data historis.
 
-## Fitur Utama
+---
 
-Berikut fitur yang bisa dikembangkan atau sudah disiapkan dalam proyek ini:
+## 🛠️ Teknologi yang Digunakan
 
-- pencatatan iuran kas siswa,
-- pencatatan pengeluaran kas,
-- tampilan saldo kas terkini,
-- riwayat transaksi pemasukan dan pengeluaran,
-- rekap data kas,
-- antarmuka yang sederhana dan mudah digunakan,
-- struktur proyek Flutter yang siap dikembangkan lebih lanjut.
+- **Framework:** [Flutter](https://flutter.dev/) (Dart)
+- **State Management:** [Riverpod](https://riverpod.dev/) (`flutter_riverpod`) untuk manajemen state yang type-safe dan terstruktur.
+- **Database & Auth:** [Supabase SDK](https://supabase.com/docs/reference/dart/introduction) (`supabase_flutter`) sebagai backend serverless utama.
+- **Charting:** [FL Chart](https://pub.dev/packages/fl_chart) untuk visualisasi diagram kas di dashboard.
+- **Icons:** [Lucide Icons](https://pub.dev/packages/lucide_icons) untuk ikon antarmuka yang konsisten dengan web.
+- **Localization:** [Intl](https://pub.dev/packages/intl) untuk format mata uang Rupiah (`Rp`) dan penanggalan Indonesia.
+- **Camera & Storage:** [Image Picker](https://pub.dev/packages/image_picker) untuk mengambil foto nota dari kamera.
+- **WhatsApp Integration:** [URL Launcher](https://pub.dev/packages/url_launcher) untuk memicu aplikasi WhatsApp secara langsung.
 
-## Teknologi yang Digunakan
+---
 
-- Flutter
-- Dart
-- Material Design
+## 📁 Struktur Proyek
 
-## Cara Instalasi dari Nol
+Berikut adalah struktur folder utama dalam direktori `application/`:
 
-Ikuti langkah berikut untuk menjalankan proyek ini dari awal sampai siap digunakan.
-
-### 1. Persiapkan kebutuhan dasar
-
-Pastikan perangkat kamu sudah memiliki:
-
-- **Git**
-- **Flutter SDK**
-- **Dart**  
-  Biasanya sudah termasuk di Flutter SDK.
-- **Android Studio** atau **VS Code**
-- Emulator Android / perangkat fisik
-
-### 2. Install Flutter
-
-Jika Flutter belum terpasang:
-
-1. Download Flutter SDK dari:
-   https://docs.flutter.dev/get-started/install
-2. Ekstrak Flutter ke folder yang mudah diakses.
-3. Tambahkan Flutter ke `PATH`.
-4. Jalankan perintah berikut untuk memastikan instalasi berhasil:
-
-```bash
-flutter doctor
+```text
+lib/
+├── config/       # Konfigurasi Supabase (URL dan Anon Key)
+├── models/       # Representasi data (Class, Expense, Payment, Student)
+├── providers/    # Riverpod providers untuk business logic & Supabase fetcher
+├── screens/      # Halaman aplikasi (Login, Dashboard, Student, Transaction, dll.)
+├── theme.dart    # Konfigurasi tema gelap (Dark Theme) custom
+└── main.dart     # Entry point aplikasi
 ```
 
-Jika ada komponen yang belum lengkap, ikuti saran dari `flutter doctor` sampai semua kebutuhan utama siap.
+---
 
-### 3. Clone repository
+## 📥 Panduan Instalasi dan Menjalankan Proyek
 
-Buka terminal lalu jalankan:
+Aplikasi ini merupakan bagian dari monorepo **SakuKelas** dan terletak di folder `/application`.
 
-```bash
-git clone https://github.com/ZyuuDev/Aplikasi-Manajemen-Kas-Kelas.git
-cd Aplikasi-Manajemen-Kas-Kelas
-```
+### Prasyarat:
+Pastikan Anda sudah menginstal:
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (versi 3.10.x atau terbaru)
+- Android Studio / VS Code dengan plugin Flutter & Dart
+- Emulator Android / iOS atau perangkat fisik (USB Debugging aktif)
 
-### 4. Ambil dependency
+### Langkah Langkah Run:
 
-Setelah masuk ke folder proyek, jalankan:
+1. **Clone Repository Utama & Masuk ke Folder Aplikasi:**
+   ```bash
+   git clone https://github.com/ZyuuDev/webkassekolah.git
+   cd webkassekolah/application
+   ```
 
-```bash
-flutter pub get
-```
+2. **Ambil Dependensi:**
+   ```bash
+   flutter pub get
+   ```
 
-Perintah ini akan mengunduh semua package yang dibutuhkan oleh aplikasi.
+3. **Pastikan Konfigurasi Supabase Sudah Benar:**
+   Buka file [supabase_config.dart](file:///c:/Users/FAIRUZ/Documents/projectfairuz/webkassekolah/application/lib/config/supabase_config.dart) dan pastikan kredensial Supabase Anda sudah sesuai dengan database pusat.
 
-### 5. Jalankan aplikasi
+4. **Jalankan Aplikasi:**
+   Mulai jalankan aplikasi pada emulator atau perangkat yang terhubung:
+   ```bash
+   flutter run
+   ```
 
-Pastikan emulator atau perangkat sudah aktif, lalu jalankan:
+---
 
-```bash
-flutter run
-```
-
-Jika ingin memilih device tertentu:
-
-```bash
-flutter devices
-flutter run -d <device_id>
-```
-
-## Setup Tambahan yang Mungkin Diperlukan
-
-Kalau kamu ingin melakukan pengembangan lebih lanjut, pastikan:
-
-- Android emulator sudah dibuat di Android Studio,
-- iOS simulator tersedia jika menggunakan macOS,
-- project sudah dibuka di editor favorit seperti VS Code,
-- semua file konfigurasi Flutter tidak mengalami error.
-
-## Struktur Proyek
-
-Secara umum, struktur proyek Flutter biasanya berisi:
-
-- `lib/` → source code utama aplikasi,
-- `android/` → konfigurasi Android,
-- `ios/` → konfigurasi iOS,
-- `web/` → konfigurasi web,
-- `assets/` → gambar atau file statis jika digunakan,
-- `pubspec.yaml` → daftar package dan aset proyek.
-
-## Alur Penggunaan Aplikasi
-
-Contoh alur penggunaan aplikasi ini:
-
-1. Pengguna membuka aplikasi.
-2. Pengguna melihat dashboard atau halaman utama.
-3. Bendahara menambahkan transaksi kas masuk.
-4. Bendahara mencatat pengeluaran jika ada kebutuhan kelas.
-5. Sistem menampilkan saldo terbaru.
-6. Semua transaksi tersimpan sebagai riwayat.
-
-## Pengembangan Selanjutnya
-
-Beberapa fitur tambahan yang bisa ditambahkan ke proyek ini:
-
-- login untuk bendahara atau admin,
-- data siswa per kelas,
-- notifikasi pembayaran kas,
-- export data ke PDF atau Excel,
-- grafik pemasukan dan pengeluaran,
-- backup dan restore data,
-- penyimpanan lokal atau cloud database,
-- filter transaksi berdasarkan tanggal.
-
-## Catatan
-
-Saat ini repository ini masih dapat dikembangkan lebih lanjut sesuai kebutuhan proyek sekolah atau organisasi kelas. README ini dibuat agar lebih jelas, informatif, dan siap dipakai sebagai dokumentasi awal proyek.
-
-## Referensi Flutter
-
-- [Flutter Documentation](https://docs.flutter.dev/)
-- [Flutter Codelabs](https://docs.flutter.dev/get-started/codelab)
-- [Flutter Cookbook](https://docs.flutter.dev/cookbook)
-
-## License
-
-Tambahkan lisensi sesuai kebutuhan proyek jika diperlukan.
+## 🔐 Keamanan & Hak Akses (RLS)
+Keamanan data kas kelas dikelola menggunakan **Row Level Security (RLS)** di Supabase:
+- **Bendahara:** Harus melakukan autentikasi (Login) untuk mendapatkan akses penuh `SELECT`, `INSERT`, `UPDATE`, dan `DELETE` data kelas yang dikelolanya.
+- **Siswa/Website:** Hanya memiliki akses read-only (`SELECT`) tanpa perlu login untuk menjaga transparansi kas.
