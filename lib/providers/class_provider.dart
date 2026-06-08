@@ -5,11 +5,13 @@ import '../models/class_info.dart';
 import '../models/student.dart';
 import '../models/payment.dart';
 import '../models/expense.dart';
+import '../models/special_collection.dart';
 
 class ClassState {
   final ClassInfo? classInfo;
   final List<Student> students;
   final List<ExpenseRecord> expenses;
+  final List<SpecialCollection> specialCollections;
   final bool isLoading;
   final String? error;
 
@@ -17,6 +19,7 @@ class ClassState {
     this.classInfo,
     this.students = const [],
     this.expenses = const [],
+    this.specialCollections = const [],
     this.isLoading = false,
     this.error,
   });
@@ -25,6 +28,7 @@ class ClassState {
     ClassInfo? classInfo,
     List<Student>? students,
     List<ExpenseRecord>? expenses,
+    List<SpecialCollection>? specialCollections,
     bool? isLoading,
     String? error,
   }) {
@@ -32,6 +36,7 @@ class ClassState {
       classInfo: classInfo ?? this.classInfo,
       students: students ?? this.students,
       expenses: expenses ?? this.expenses,
+      specialCollections: specialCollections ?? this.specialCollections,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
@@ -189,10 +194,42 @@ class ClassNotifier extends StateNotifier<ClassState> {
         );
       }).toList();
 
+      // 5. Fetch special collections
+      final List<dynamic> collectionsData = await _supabase
+          .from('special_collections')
+          .select('*')
+          .eq('class_id', classId)
+          .order('created_at', ascending: false);
+
+      // 6. Fetch special collection payments
+      final List<dynamic> collectionPaymentsData = collectionsData.isNotEmpty
+          ? await _supabase
+              .from('special_collection_payments')
+              .select('collection_id, student_id')
+              .inFilter(
+                'collection_id',
+                collectionsData.map((c) => c['id'] as String).toList(),
+              )
+          : [];
+
+      // Map collection_id -> list of paid student IDs
+      final Map<String, List<String>> paymentsByCollection = {};
+      for (final p in collectionPaymentsData) {
+        final cid = p['collection_id'] as String;
+        final sid = p['student_id'] as String;
+        paymentsByCollection.putIfAbsent(cid, () => []).add(sid);
+      }
+
+      final specialCollections = collectionsData.map<SpecialCollection>((c) {
+        final paidIds = paymentsByCollection[c['id'] as String] ?? [];
+        return SpecialCollection.fromJson(c).withPayments(paidIds);
+      }).toList();
+
       state = ClassState(
         classInfo: classInfo,
         students: students,
         expenses: expenses,
+        specialCollections: specialCollections,
         isLoading: false,
       );
     } catch (e) {
@@ -200,7 +237,92 @@ class ClassNotifier extends StateNotifier<ClassState> {
     }
   }
 
-  // Action: Add new student
+  // ── Special Collections ──────────────────────────────────────────────
+
+  // Action: Create a new special collection
+  Future<void> createSpecialCollection({
+    required String name,
+    required int amount,
+    String? description,
+  }) async {
+    final classId = state.classInfo?.id;
+    if (classId == null) return;
+
+    try {
+      state = state.copyWith(isLoading: true);
+
+      // Get active academic_year_id
+      final academicData = await _supabase
+          .from('academic_years')
+          .select('id')
+          .eq('class_id', classId)
+          .eq('is_active', true)
+          .maybeSingle();
+
+      await _supabase.from('special_collections').insert({
+        'class_id': classId,
+        'academic_year_id': academicData?['id'],
+        'name': name,
+        'amount': amount,
+        'description': description,
+        'created_by': _supabase.auth.currentUser!.id,
+      });
+
+      await loadClassData();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  // Action: Save/sync payment status for a collection (replaces all payments)
+  Future<void> updateSpecialCollectionPayments({
+    required String collectionId,
+    required List<String> paidStudentIds,
+  }) async {
+    try {
+      state = state.copyWith(isLoading: true);
+
+      // Delete all existing payments for this collection
+      await _supabase
+          .from('special_collection_payments')
+          .delete()
+          .eq('collection_id', collectionId);
+
+      // Insert new payments for all checked students
+      if (paidStudentIds.isNotEmpty) {
+        final rows = paidStudentIds
+            .map((sid) => {
+                  'collection_id': collectionId,
+                  'student_id': sid,
+                  'created_by': _supabase.auth.currentUser!.id,
+                })
+            .toList();
+        await _supabase.from('special_collection_payments').insert(rows);
+      }
+
+      await loadClassData();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  // Action: Delete a special collection (and cascade its payments)
+  Future<void> deleteSpecialCollection(String collectionId) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      await _supabase
+          .from('special_collections')
+          .delete()
+          .eq('id', collectionId);
+      await loadClassData();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
   Future<void> addStudent(String name, String nis) async {
     final classId = state.classInfo?.id;
     if (classId == null) return;
@@ -232,6 +354,7 @@ class ClassNotifier extends StateNotifier<ClassState> {
         classInfo: state.classInfo,
         students: [...state.students, newStudent],
         expenses: state.expenses,
+        specialCollections: state.specialCollections,
         isLoading: false,
       );
     } catch (e) {
@@ -329,6 +452,36 @@ class ClassNotifier extends StateNotifier<ClassState> {
         'date': DateTime.now().toIso8601String(),
       });
 
+      await loadClassData();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  // Action: Update student name/NIS
+  Future<void> updateStudent(String studentId, String name, String nis) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      await _supabase
+          .from('students')
+          .update({'name': name, 'nis': nis})
+          .eq('id', studentId);
+      await loadClassData();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  // Action: Deactivate student (soft delete)
+  Future<void> deactivateStudent(String studentId) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      await _supabase
+          .from('students')
+          .update({'is_active': false})
+          .eq('id', studentId);
       await loadClassData();
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

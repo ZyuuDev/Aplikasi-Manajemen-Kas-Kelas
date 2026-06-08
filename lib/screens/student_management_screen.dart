@@ -18,6 +18,8 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
   String _searchQuery = "";
   final _nameController = TextEditingController();
   final _nisController = TextEditingController();
+  final _editNameController = TextEditingController();
+  final _editNisController = TextEditingController();
 
   String _formatRupiah(int value) {
     return NumberFormat.currency(
@@ -99,9 +101,109 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
     );
   }
 
-  Future<void> _launchWhatsApp(Student student, int debt, int debtWeeks) async {
+  void _showEditStudentDialog(Student student) {
+    _editNameController.text = student.name;
+    _editNisController.text = student.nis;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(LucideIcons.userCog, color: Colors.blueAccent),
+            SizedBox(width: 8),
+            Text('Edit Data Siswa'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _editNameController,
+              decoration: const InputDecoration(
+                labelText: 'Nama Lengkap',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _editNisController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'NIS',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = _editNameController.text.trim();
+              final nis = _editNisController.text.trim();
+              if (name.isEmpty || nis.isEmpty) return;
+              ref.read(classProvider.notifier).updateStudent(student.id, name, nis);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Data siswa berhasil diperbarui.'),
+                  backgroundColor: AppTheme.primaryEmerald,
+                ),
+              );
+            },
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeactivateConfirm(Student student) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(LucideIcons.userX, color: AppTheme.destructiveRose),
+            SizedBox(width: 8),
+            Text('Nonaktifkan Siswa'),
+          ],
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin menonaktifkan ${student.name}? Siswa ini tidak akan tampil lagi di daftar, namun data transaksinya tetap tersimpan.',
+          style: const TextStyle(fontSize: 13, color: AppTheme.textMuted),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.destructiveRose,
+            ),
+            onPressed: () {
+              ref.read(classProvider.notifier).deactivateStudent(student.id);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${student.name} telah dinonaktifkan.'),
+                  backgroundColor: AppTheme.accentAmber,
+                ),
+              );
+            },
+            child: const Text('Ya, Nonaktifkan'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchWhatsApp(Student student, int debt, int debtWeeks, String className) async {
     final message = 
-      "Halo ${student.name}, ini pengingat dari Bendahara Kelas XII IPA 1. 📢\n\n"
+      "Halo ${student.name}, ini pengingat dari Bendahara Kelas $className. 📢\n\n"
       "Kamu saat ini memiliki sisa tunggakan uang kas kelas sebesar *${_formatRupiah(debt)}* (selama *$debtWeeks minggu* berjalan).\n\n"
       "Mohon untuk segera melakukan pembayaran ke bendahara kelas ya. Terima kasih! 🙏";
 
@@ -309,7 +411,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                                             foregroundColor: Colors.white,
                                             padding: const EdgeInsets.symmetric(vertical: 12.0),
                                           ),
-                                          onPressed: () => _launchWhatsApp(student, debt, debtWeeks),
+                                          onPressed: () => _launchWhatsApp(student, debt, debtWeeks, state.classInfo?.name ?? 'Kelas'),
                                           child: const Row(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
@@ -322,19 +424,37 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                                       ),
                                       const SizedBox(width: 8),
                                       
-                                      // History count notice
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.darkMuted,
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(color: AppTheme.darkBorder),
-                                        ),
-                                        child: Text(
-                                          '${student.payments.length}x Pembayaran',
-                                          style: const TextStyle(fontSize: 10, color: AppTheme.textMuted, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
+                                      // Edit & Deactivate Buttons
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Edit button
+                          IconButton(
+                            tooltip: 'Edit Data Siswa',
+                            icon: const Icon(LucideIcons.pencil, size: 16, color: Colors.blueAccent),
+                            style: IconButton.styleFrom(
+                              backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () => _showEditStudentDialog(student),
+                          ),
+                          const SizedBox(width: 6),
+                          // Deactivate button
+                          IconButton(
+                            tooltip: 'Nonaktifkan Siswa',
+                            icon: const Icon(LucideIcons.userX, size: 16, color: AppTheme.destructiveRose),
+                            style: IconButton.styleFrom(
+                              backgroundColor: AppTheme.destructiveRose.withOpacity(0.1),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () => _showDeactivateConfirm(student),
+                          ),
+                        ],
+                      ),
                                     ],
                                   ),
                                 ],
