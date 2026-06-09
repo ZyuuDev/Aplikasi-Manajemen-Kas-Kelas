@@ -74,7 +74,7 @@ Pastikan Anda sudah menginstal:
    ```
 
 3. **Pastikan Konfigurasi Supabase Sudah Benar:**
-   Buka file [supabase_config.dart](file:///c:/Users/FAIRUZ/Documents/projectfairuz/webkassekolah/application/lib/config/supabase_config.dart) dan pastikan kredensial Supabase Anda sudah sesuai dengan database pusat.
+   Buka file [supabase_config.dart](application/lib/config/supabase_config.dart) dan pastikan kredensial Supabase Anda sudah sesuai dengan database pusat.
 
 4. **Jalankan Aplikasi:**
    Mulai jalankan aplikasi pada emulator atau perangkat yang terhubung:
