@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/class_provider.dart';
 import '../theme.dart';
 import 'batch_payment_screen.dart';
@@ -11,6 +12,8 @@ import 'expense_history_screen.dart';
 import 'special_collections_screen.dart';
 import 'student_management_screen.dart';
 import 'login_screen.dart';
+import 'income_form_screen.dart';
+import 'class_settings_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -189,7 +192,7 @@ class DashboardScreen extends ConsumerWidget {
       );
     }
 
-    // Grouping transactions for recent timeline list (merged payments and expenses)
+    // Grouping transactions for recent timeline list (merged payments, misc incomes, and expenses)
     final incomes = state.students.flatMap((std) => std.payments.map((p) => {
           'id': p.id,
           'type': 'INCOME',
@@ -198,6 +201,14 @@ class DashboardScreen extends ConsumerWidget {
           'amount': p.amount,
           'date': p.date,
         }));
+    final miscIncomes = state.miscIncomes.map((misc) => {
+          'id': misc.id,
+          'type': 'INCOME',
+          'title': 'Pemasukan Umum',
+          'subtitle': misc.description,
+          'amount': misc.amount,
+          'date': misc.date,
+        });
     final expenses = state.expenses.map((exp) => {
           'id': exp.id,
           'type': 'EXPENSE',
@@ -207,7 +218,7 @@ class DashboardScreen extends ConsumerWidget {
           'date': exp.date,
         });
 
-    final allActivities = [...incomes, ...expenses];
+    final allActivities = [...incomes, ...miscIncomes, ...expenses];
     allActivities.sort((a, b) => (b['date'] as DateTime).compareTo(a['date'] as DateTime));
 
     // Get latest 5 activities
@@ -232,6 +243,12 @@ class DashboardScreen extends ConsumerWidget {
               pay.date.isBefore(weekEnd)) {
             income += pay.amount;
           }
+        }
+      }
+      for (var misc in state.miscIncomes) {
+        if ((misc.date.isAfter(weekStart) || misc.date.isAtSameMomentAs(weekStart)) &&
+            misc.date.isBefore(weekEnd)) {
+          income += misc.amount;
         }
       }
 
@@ -276,11 +293,15 @@ class DashboardScreen extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(LucideIcons.logOut, color: AppTheme.textMuted),
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
+            tooltip: 'Keluar',
+            onPressed: () async {
+              await Supabase.instance.client.auth.signOut();
+              if (context.mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              }
             },
           ),
         ],
@@ -393,6 +414,14 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 _buildActionButton(
                   context: context,
+                  icon: LucideIcons.plusSquare,
+                  color: const Color(0xFF2DD4BF),
+                  title: 'Masuk Umum',
+                  subtitle: 'Catat pemasukan',
+                  target: const IncomeFormScreen(),
+                ),
+                _buildActionButton(
+                  context: context,
                   icon: LucideIcons.clipboardList,
                   color: const Color(0xFF8B5CF6),
                   title: 'Iuran Khusus',
@@ -414,6 +443,14 @@ class DashboardScreen extends ConsumerWidget {
                   title: 'Data Siswa',
                   subtitle: 'Nagih & Blast WA',
                   target: const StudentManagementScreen(),
+                ),
+                _buildActionButton(
+                  context: context,
+                  icon: LucideIcons.settings,
+                  color: const Color(0xFF94A3B8),
+                  title: 'Pengaturan',
+                  subtitle: 'QRIS, Libur, Asisten',
+                  target: const ClassSettingsScreen(),
                 ),
                 GestureDetector(
                   onTap: () => _showResetDialog(context, ref),
@@ -730,7 +767,7 @@ class DashboardScreen extends ConsumerWidget {
       final weekStart = start.add(Duration(days: index * 7));
       final weekEnd = weekStart.add(const Duration(days: 7));
 
-      // Calculate weekly income
+      // Calculate weekly income (iuran siswa + pemasukan umum)
       int income = 0;
       for (var std in state.students) {
         for (var pay in std.payments) {
@@ -738,6 +775,12 @@ class DashboardScreen extends ConsumerWidget {
               pay.date.isBefore(weekEnd)) {
             income += pay.amount;
           }
+        }
+      }
+      for (var misc in state.miscIncomes) {
+        if ((misc.date.isAfter(weekStart) || misc.date.isAtSameMomentAs(weekStart)) &&
+            misc.date.isBefore(weekEnd)) {
+          income += misc.amount;
         }
       }
 

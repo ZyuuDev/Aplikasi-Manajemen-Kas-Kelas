@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Wajib untuk build release: akses jaringan ke Supabase -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="application"
+        android:label="SakuKelas"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

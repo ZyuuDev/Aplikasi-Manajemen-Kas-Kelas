@@ -7,6 +7,8 @@ class ClassInfo {
   final String academicYear;
   final int semester;
 
+  final String? qrisUrl;
+
   ClassInfo({
     required this.id,
     required this.name,
@@ -15,6 +17,7 @@ class ClassInfo {
     required this.semesterStartDate,
     required this.academicYear,
     required this.semester,
+    this.qrisUrl,
   });
 
   ClassInfo copyWith({
@@ -25,6 +28,7 @@ class ClassInfo {
     DateTime? semesterStartDate,
     String? academicYear,
     int? semester,
+    String? qrisUrl,
   }) {
     return ClassInfo(
       id: id ?? this.id,
@@ -34,6 +38,7 @@ class ClassInfo {
       semesterStartDate: semesterStartDate ?? this.semesterStartDate,
       academicYear: academicYear ?? this.academicYear,
       semester: semester ?? this.semester,
+      qrisUrl: qrisUrl ?? this.qrisUrl,
     );
   }
 }

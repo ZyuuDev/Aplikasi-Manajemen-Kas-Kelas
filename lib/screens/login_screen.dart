@@ -32,10 +32,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       });
 
       try {
-        final email = input == 'bendahara' ? 'arrasydnanda09@gmail.com' : input;
-        
         final response = await Supabase.instance.client.auth.signInWithPassword(
-          email: email,
+          email: input,
           password: password,
         );
 
@@ -56,11 +54,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         }
       } on AuthException catch (e) {
         setState(() {
-          _errorMessage = e.message;
+          _errorMessage = e.message.toLowerCase().contains('invalid login')
+              ? 'Email atau password salah.'
+              : e.message;
         });
       } catch (e) {
+        final msg = e.toString();
         setState(() {
-          _errorMessage = 'Terjadi kesalahan: $e';
+          // Kegagalan jaringan (SocketException/ClientException) diberi pesan ramah
+          _errorMessage = (msg.contains('SocketException') ||
+                  msg.contains('ClientException') ||
+                  msg.contains('TimeoutException'))
+              ? 'Tidak dapat terhubung ke server. Periksa koneksi internet HP kamu, lalu coba lagi.'
+              : 'Terjadi kesalahan: $e';
         });
       } finally {
         if (mounted) {
@@ -184,17 +190,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             const SizedBox(height: 24),
                             
-                            // Username Input
+                            // Email Input
                             TextFormField(
                               controller: _usernameController,
+                              keyboardType: TextInputType.emailAddress,
                               decoration: const InputDecoration(
-                                labelText: 'Username',
-                                hintText: 'bendahara',
-                                prefixIcon: Icon(LucideIcons.user, size: 20, color: AppTheme.textMuted),
+                                labelText: 'Email',
+                                hintText: 'email@bendahara.com',
+                                prefixIcon: Icon(LucideIcons.mail, size: 20, color: AppTheme.textMuted),
                               ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Harap isi username.';
+                                  return 'Harap isi email.';
                                 }
                                 return null;
                               },
@@ -272,10 +279,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Helper Notice
                   const Text(
-                    '💡 Akun Bendahara: "arrasydnanda09@gmail.com" / "nanda1234"\n(atau ketik "bendahara" dengan password "nanda1234")',
+                    'Hanya bendahara & asisten terdaftar yang dapat masuk.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12,

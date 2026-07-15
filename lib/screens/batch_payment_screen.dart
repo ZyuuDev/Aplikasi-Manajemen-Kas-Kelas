@@ -26,7 +26,7 @@ class _BatchPaymentScreenState extends ConsumerState<BatchPaymentScreen> {
     ).format(value);
   }
 
-  void _handleSave(int weeklyFee) {
+  Future<void> _handleSave(int weeklyFee) async {
     if (_selectedStudentIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -51,21 +51,31 @@ class _BatchPaymentScreenState extends ConsumerState<BatchPaymentScreen> {
       return;
     }
 
-    ref.read(classProvider.notifier).addPaymentBatch(
-          _selectedStudentIds,
-          amountPerStudent,
-        );
+    try {
+      await ref.read(classProvider.notifier).addPaymentBatch(
+            _selectedStudentIds,
+            amountPerStudent,
+          );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Berhasil mencatat pembayaran ${_selectedStudentIds.length} siswa sebesar ${_formatRupiah(amountPerStudent)} / siswa.',
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Berhasil mencatat pembayaran ${_selectedStudentIds.length} siswa sebesar ${_formatRupiah(amountPerStudent)} / siswa.',
+          ),
+          backgroundColor: AppTheme.primaryEmerald,
         ),
-        backgroundColor: AppTheme.primaryEmerald,
-      ),
-    );
-
-    Navigator.pop(context);
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menyimpan pembayaran: $e'),
+          backgroundColor: AppTheme.destructiveRose,
+        ),
+      );
+    }
   }
 
   @override

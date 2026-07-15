@@ -5,12 +5,13 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'config/supabase_config.dart';
 import 'theme.dart';
 import 'screens/login_screen.dart';
+import 'screens/dashboard_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await initializeDateFormatting('id_ID', null);
-  
+
   await Supabase.initialize(
     url: SupabaseConfig.url,
     anonKey: SupabaseConfig.anonKey,
@@ -28,11 +29,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Sesi supabase_flutter persist antar-buka aplikasi: jika masih ada,
+    // langsung ke dashboard tanpa login ulang.
+    final hasSession = Supabase.instance.client.auth.currentSession != null;
+
     return MaterialApp(
       title: 'SakuKelas Bendahara',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const LoginScreen(),
+      home: hasSession ? const DashboardScreen() : const LoginScreen(),
     );
   }
 }
