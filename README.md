@@ -1,4 +1,4 @@
-# SakuKelas Bendahara (Aplikasi Mobile)
+# SakuKelas Bendahara (Aplikasi Mobile/HP)
 
 SakuKelas Bendahara adalah aplikasi mobile berbasis **Flutter** yang dirancang khusus sebagai "Pusat Kendali" bagi Bendahara Kelas untuk mengelola uang kas kelas secara lebih cepat, terstruktur, dan transparan. 
 
