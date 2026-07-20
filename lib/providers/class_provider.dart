@@ -72,10 +72,15 @@ class ClassState {
     final diffDays = current.difference(start).inDays;
     final rawWeeks = (diffDays / 7).floor() + 1;
 
-    // Count how many offWeeks fall between start and today (inclusive)
+    // Count how many UNIQUE offWeeks fall between start and today (inclusive)
+    final uniqueDates = offWeeks.map((ow) =>
+      "${ow.startDate.year}-${ow.startDate.month.toString().padLeft(2, '0')}-${ow.startDate.day.toString().padLeft(2, '0')}"
+    ).toSet();
+
     int offWeeksCount = 0;
-    for (final ow in offWeeks) {
-      final owDate = DateTime(ow.startDate.year, ow.startDate.month, ow.startDate.day);
+    for (final dateStr in uniqueDates) {
+      final parts = dateStr.split('-');
+      final owDate = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
       if (!owDate.isBefore(start) && !owDate.isAfter(current)) {
         offWeeksCount++;
       }
@@ -622,10 +627,19 @@ class ClassNotifier extends StateNotifier<ClassState> {
         throw Exception('Tidak ada semester aktif. Silakan buat semester terlebih dahulu.');
       }
 
+      final formattedDate = startDate.toIso8601String().split('T')[0];
+
+      final exists = state.offWeeks.any((ow) =>
+        ow.startDate.toIso8601String().split('T')[0] == formattedDate
+      );
+      if (exists) {
+        throw Exception('Minggu libur untuk tanggal ini sudah pernah ditambahkan.');
+      }
+
       await _supabase.from('off_weeks').insert({
         'class_id': classId,
         'academic_year_id': academicYearId,
-        'start_date': startDate.toIso8601String().split('T')[0],
+        'start_date': formattedDate,
         'description': description,
       });
 
