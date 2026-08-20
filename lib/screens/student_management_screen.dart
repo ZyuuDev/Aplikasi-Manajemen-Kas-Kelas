@@ -16,6 +16,7 @@ class StudentManagementScreen extends ConsumerStatefulWidget {
 
 class _StudentManagementScreenState extends ConsumerState<StudentManagementScreen> {
   String _searchQuery = "";
+  String _filterStatus = "all"; // "all" | "lunas" | "nunggak"
   final _nameController = TextEditingController();
   final _nisController = TextEditingController();
   final _editNameController = TextEditingController();
@@ -270,11 +271,27 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
   Widget build(BuildContext context) {
     final state = ref.watch(classProvider);
     
-    // Filter students
+    // Filter students by search and status
     final filtered = state.students.where((std) {
-      return std.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+      final matchesSearch = std.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           std.nis.contains(_searchQuery);
+      if (!matchesSearch) return false;
+
+      final isLunas = state.getStudentDebt(std) <= 0;
+      if (_filterStatus == "lunas") return isLunas;
+      if (_filterStatus == "nunggak") return !isLunas;
+      return true;
     }).toList();
+
+    // Sort: if lunas tab, sort by highest paid; if nunggak tab, sort by highest debt
+    if (_filterStatus == "lunas") {
+      filtered.sort((a, b) => b.totalPaid.compareTo(a.totalPaid));
+    } else if (_filterStatus == "nunggak") {
+      filtered.sort((a, b) => state.getStudentDebt(b).compareTo(state.getStudentDebt(a)));
+    }
+
+    final totalLunas = state.students.where((s) => state.getStudentDebt(s) <= 0).length;
+    final totalNunggak = state.students.where((s) => state.getStudentDebt(s) > 0).length;
 
     return Scaffold(
       appBar: AppBar(
@@ -290,7 +307,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
         children: [
           // Row 1: Search Box
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
             child: TextField(
               decoration: const InputDecoration(
                 labelText: 'Cari Nama / NIS Siswa...',
@@ -304,14 +321,52 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
             ),
           ),
 
-          // Row 2: Header stats
+          // Row 2: Status Filter Tabs (Semua, Teladan/Lunas, Nunggak)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+            child: Container(
+              padding: const EdgeInsets.all(4.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFF050810),
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: AppTheme.darkBorder),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildFilterTab(
+                      label: 'Semua (${state.students.length})',
+                      value: 'all',
+                      activeColor: AppTheme.primaryEmerald,
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildFilterTab(
+                      label: '🥇 Teladan ($totalLunas)',
+                      value: 'lunas',
+                      activeColor: AppTheme.primaryEmerald,
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildFilterTab(
+                      label: '⚠️ Nunggak ($totalNunggak)',
+                      value: 'nunggak',
+                      activeColor: AppTheme.destructiveRose,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Row 3: Header stats
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Total Siswa: ${filtered.length}',
+                  'Ditemukan: ${filtered.length} Siswa',
                   style: const TextStyle(fontSize: 12, color: AppTheme.textMuted, fontWeight: FontWeight.bold),
                 ),
                 Text(
@@ -490,6 +545,34 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFilterTab({
+    required String label,
+    required String value,
+    required Color activeColor,
+  }) {
+    final isActive = _filterStatus == value;
+    return GestureDetector(
+      onTap: () => setState(() => _filterStatus = value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6.0),
+        decoration: BoxDecoration(
+          color: isActive ? activeColor.withOpacity(0.18) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: isActive ? activeColor : AppTheme.textMuted,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

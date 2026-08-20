@@ -43,7 +43,7 @@ class ExpenseHistoryScreen extends ConsumerWidget {
     }
   }
 
-  void _showDetailDialog(BuildContext context, ExpenseRecord expense) {
+  void _showDetailDialog(BuildContext context, WidgetRef ref, ExpenseRecord expense) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -198,11 +198,84 @@ class ExpenseHistoryScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
+
+              // Batal / Hapus Transaksi (Undo)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.destructiveRose.withOpacity(0.12),
+                    foregroundColor: AppTheme.destructiveRose,
+                    elevation: 0,
+                    side: BorderSide(color: AppTheme.destructiveRose.withOpacity(0.3)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: const Icon(LucideIcons.trash2, size: 16),
+                  label: const Text('Batal / Hapus Pengeluaran (Undo)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  onPressed: () {
+                    _confirmDelete(context, ref, expense);
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
             ],
           ),
         );
       },
+    );
+  }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref, ExpenseRecord expense) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(LucideIcons.alertTriangle, color: AppTheme.destructiveRose),
+            SizedBox(width: 8),
+            Text('Batalkan Pengeluaran?'),
+          ],
+        ),
+        content: Text(
+          'Yakin ingin membatalkan transaksi "${expense.title}" sebesar ${_formatRupiah(expense.amount)}? Tindakan ini akan mengembalikan saldo kas.',
+          style: const TextStyle(fontSize: 13, color: AppTheme.textMuted),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.destructiveRose),
+            onPressed: () async {
+              Navigator.pop(ctx); // Close dialog
+              Navigator.pop(context); // Close bottom sheet
+              try {
+                await ref.read(classProvider.notifier).deleteExpense(expense.id);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Transaksi pengeluaran berhasil dibatalkan.'),
+                      backgroundColor: AppTheme.primaryEmerald,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Gagal membatalkan transaksi: $e'),
+                      backgroundColor: AppTheme.destructiveRose,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Ya, Hapus'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -321,7 +394,7 @@ class ExpenseHistoryScreen extends ConsumerWidget {
                       final formattedDate = DateFormat('d MMM yyyy', 'id_ID').format(expense.date);
 
                       return GestureDetector(
-                        onTap: () => _showDetailDialog(context, expense),
+                        onTap: () => _showDetailDialog(context, ref, expense),
                         child: Card(
                           margin: const EdgeInsets.only(bottom: 8.0),
                           child: Padding(

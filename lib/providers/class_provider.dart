@@ -793,6 +793,30 @@ class ClassNotifier extends StateNotifier<ClassState> {
       rethrow;
     }
   }
+
+  // Action: Batal Transaksi Pengeluaran (Undo/Void Expense)
+  Future<void> deleteExpense(String expenseId) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      await _supabase.from('transactions').delete().eq('id', expenseId);
+      await loadClassData();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
+
+  // Action: Batal Transaksi Pembayaran Kas (Undo/Void Payment)
+  Future<void> deletePayment(String paymentId) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      await _supabase.from('transactions').delete().eq('id', paymentId);
+      await loadClassData();
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      rethrow;
+    }
+  }
 }
 
 // Provider definition
