@@ -56,7 +56,7 @@ Aplikasi ini merupakan bagian dari monorepo **SakuKelas** dan terletak di folder
 
 ### Prasyarat:
 Pastikan Anda sudah menginstal:
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (versi 3.10.x atau terbaru)
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (versi 3.1x.x atau terbaru)
 - Android Studio / VS Code dengan plugin Flutter & Dart
 - Emulator Android / iOS atau perangkat fisik (USB Debugging aktif)
 
