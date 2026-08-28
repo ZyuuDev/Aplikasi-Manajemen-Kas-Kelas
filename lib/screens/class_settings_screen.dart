@@ -77,30 +77,28 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
 
   void _showAddHolidayDialog() {
     DateTime selectedDate = DateTime.now();
-    _holidayDescController.clear();
+    final messenger = ScaffoldMessenger.of(context);
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (sbContext, setDialogState) => AlertDialog(
           title: const Text('Tambah Minggu Libur'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Pilih tanggal dalam minggu libur tersebut. Sistem akan merekam awal minggu (Hari Senin) untuk dikecualikan.',
+                'Pilih tanggal di minggu yang diliburkan (otomatis dimulai dari hari Senin). Seluruh tagihan siswa untuk minggu ini tidak akan dihitung.',
                 style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
               ),
               const SizedBox(height: 16),
-              // Date Display
               InkWell(
                 onTap: () async {
                   final picked = await showDatePicker(
-                    context: context,
+                    context: sbContext,
                     initialDate: selectedDate,
-                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2035),
                   );
                   if (picked != null) {
                     setDialogState(() {
@@ -111,7 +109,7 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   decoration: BoxDecoration(
-                    color: AppTheme.darkBorder.withOpacity(0.3),
+                    color: AppTheme.darkBorder.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: AppTheme.darkBorder),
                   ),
@@ -139,12 +137,12 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Batal'),
             ),
             ElevatedButton(
               onPressed: () async {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 setState(() {
                   _isActionLoading = true;
                 });
@@ -155,27 +153,25 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
                         startDate: monday,
                         description: _holidayDescController.text.trim(),
                       );
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Minggu libur berhasil ditambahkan!'),
-                        backgroundColor: AppTheme.primaryEmerald,
-                      ),
-                    );
-                  }
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Minggu libur berhasil ditambahkan!'),
+                      backgroundColor: AppTheme.primaryEmerald,
+                    ),
+                  );
                 } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Gagal menambahkan: $e'),
-                        backgroundColor: AppTheme.destructiveRose,
-                      ),
-                    );
-                  }
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text('Gagal menambahkan: $e'),
+                      backgroundColor: AppTheme.destructiveRose,
+                    ),
+                  );
                 } finally {
-                  setState(() {
-                    _isActionLoading = false;
-                  });
+                  if (mounted) {
+                    setState(() {
+                      _isActionLoading = false;
+                    });
+                  }
                 }
               },
               child: const Text('Simpan'),
@@ -257,7 +253,7 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
           ),
           if (_isActionLoading)
             Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               child: const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryEmerald),
@@ -304,7 +300,7 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
                   height: 240,
                   width: 240,
                   decoration: BoxDecoration(
-                    color: AppTheme.darkBorder.withOpacity(0.2),
+                    color: AppTheme.darkBorder.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppTheme.darkBorder),
                   ),
@@ -398,7 +394,7 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(LucideIcons.calendarDays, color: AppTheme.textMuted.withOpacity(0.4), size: 48),
+                        Icon(LucideIcons.calendarDays, color: AppTheme.textMuted.withValues(alpha: 0.4), size: 48),
                         const SizedBox(height: 12),
                         const Text(
                           'Belum ada minggu libur yang dikecualikan.',
@@ -422,7 +418,7 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
                         leading: Container(
                           padding: const EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
-                            color: AppTheme.primaryEmerald.withOpacity(0.1),
+                            color: AppTheme.primaryEmerald.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           child: const Icon(LucideIcons.calendarCheck, color: AppTheme.primaryEmerald, size: 18),
@@ -438,14 +434,15 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
                         trailing: IconButton(
                           icon: const Icon(LucideIcons.trash2, color: AppTheme.destructiveRose, size: 18),
                           onPressed: () async {
+                            final messenger = ScaffoldMessenger.of(context);
                             final confirm = await showDialog<bool>(
                               context: context,
-                              builder: (context) => AlertDialog(
+                              builder: (dialogCtx) => AlertDialog(
                                 title: const Text('Hapus Minggu Libur'),
                                 content: const Text('Apakah Anda yakin ingin menghapus pengecualian minggu libur ini? Tagihan siswa akan disesuaikan kembali.'),
                                 actions: [
-                                  TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
-                                  TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Hapus', style: TextStyle(color: AppTheme.destructiveRose))),
+                                  TextButton(onPressed: () => Navigator.pop(dialogCtx, false), child: const Text('Batal')),
+                                  TextButton(onPressed: () => Navigator.pop(dialogCtx, true), child: const Text('Hapus', style: TextStyle(color: AppTheme.destructiveRose))),
                                 ],
                               ),
                             );
@@ -456,24 +453,22 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
                               });
                               try {
                                 await ref.read(classProvider.notifier).deleteOffWeek(ow.id);
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Pengecualian libur berhasil dihapus!'),
-                                      backgroundColor: AppTheme.primaryEmerald,
-                                    ),
-                                  );
-                                }
+                                messenger.showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Pengecualian libur berhasil dihapus!'),
+                                    backgroundColor: AppTheme.primaryEmerald,
+                                  ),
+                                );
                               } catch (e) {
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: AppTheme.destructiveRose),
-                                  );
-                                }
+                                messenger.showSnackBar(
+                                  SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: AppTheme.destructiveRose),
+                                );
                               } finally {
-                                setState(() {
-                                  _isActionLoading = false;
-                                });
+                                if (mounted) {
+                                  setState(() {
+                                    _isActionLoading = false;
+                                  });
+                                }
                               }
                             }
                           },
@@ -542,7 +537,7 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(LucideIcons.users, color: AppTheme.textMuted.withOpacity(0.4), size: 40),
+                        Icon(LucideIcons.users, color: AppTheme.textMuted.withValues(alpha: 0.4), size: 40),
                         const SizedBox(height: 12),
                         const Text(
                           'Belum ada asisten terdaftar.',
@@ -565,7 +560,7 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
                         leading: Container(
                           padding: const EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
-                            color: Colors.cyan.withOpacity(0.1),
+                            color: Colors.cyan.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(LucideIcons.user, color: Colors.cyan, size: 18),
@@ -577,14 +572,15 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
                         trailing: IconButton(
                           icon: const Icon(LucideIcons.userMinus, color: AppTheme.destructiveRose, size: 18),
                           onPressed: () async {
+                            final messenger = ScaffoldMessenger.of(context);
                             final confirm = await showDialog<bool>(
                               context: context,
-                              builder: (context) => AlertDialog(
+                              builder: (dialogCtx) => AlertDialog(
                                 title: const Text('Hapus Asisten'),
                                 content: Text('Hapus izin asisten untuk email "${ca.email}"? Mereka tidak akan bisa lagi mengakses data kelas ini.'),
                                 actions: [
-                                  TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
-                                  TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Hapus', style: TextStyle(color: AppTheme.destructiveRose))),
+                                  TextButton(onPressed: () => Navigator.pop(dialogCtx, false), child: const Text('Batal')),
+                                  TextButton(onPressed: () => Navigator.pop(dialogCtx, true), child: const Text('Hapus', style: TextStyle(color: AppTheme.destructiveRose))),
                                 ],
                               ),
                             );
@@ -595,24 +591,22 @@ class _ClassSettingsScreenState extends ConsumerState<ClassSettingsScreen> with 
                               });
                               try {
                                 await ref.read(classProvider.notifier).removeAssistant(ca.id);
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Akses asisten dicabut!'),
-                                      backgroundColor: AppTheme.primaryEmerald,
-                                    ),
-                                  );
-                                }
+                                messenger.showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Akses asisten dicabut!'),
+                                    backgroundColor: AppTheme.primaryEmerald,
+                                  ),
+                                );
                               } catch (e) {
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Gagal mencabut akses: $e'), backgroundColor: AppTheme.destructiveRose),
-                                  );
-                                }
+                                messenger.showSnackBar(
+                                  SnackBar(content: Text('Gagal mencabut akses: $e'), backgroundColor: AppTheme.destructiveRose),
+                                );
                               } finally {
-                                setState(() {
-                                  _isActionLoading = false;
-                                });
+                                if (mounted) {
+                                  setState(() {
+                                    _isActionLoading = false;
+                                  });
+                                }
                               }
                             }
                           },

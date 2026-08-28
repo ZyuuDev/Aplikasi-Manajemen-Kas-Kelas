@@ -83,7 +83,7 @@ class ExpenseHistoryScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(_categoryIcon(expense.category), color: color, size: 22),
@@ -105,7 +105,7 @@ class ExpenseHistoryScreen extends ConsumerWidget {
                           margin: const EdgeInsets.only(top: 4),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.1),
+                            color: color.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -164,9 +164,9 @@ class ExpenseHistoryScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryEmerald.withOpacity(0.05),
+                    color: AppTheme.primaryEmerald.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.primaryEmerald.withOpacity(0.2)),
+                    border: Border.all(color: AppTheme.primaryEmerald.withValues(alpha: 0.2)),
                   ),
                   child: const Row(
                     children: [
@@ -205,10 +205,10 @@ class ExpenseHistoryScreen extends ConsumerWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.destructiveRose.withOpacity(0.12),
+                    backgroundColor: AppTheme.destructiveRose.withValues(alpha: 0.12),
                     foregroundColor: AppTheme.destructiveRose,
                     elevation: 0,
-                    side: BorderSide(color: AppTheme.destructiveRose.withOpacity(0.3)),
+                    side: BorderSide(color: AppTheme.destructiveRose.withValues(alpha: 0.3)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   icon: const Icon(LucideIcons.trash2, size: 16),
@@ -366,9 +366,9 @@ class ExpenseHistoryScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppTheme.destructiveRose.withOpacity(0.1),
+                          color: AppTheme.destructiveRose.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppTheme.destructiveRose.withOpacity(0.2)),
+                          border: Border.all(color: AppTheme.destructiveRose.withValues(alpha: 0.2)),
                         ),
                         child: Text(
                           '${expenses.length} Transaksi',
@@ -405,7 +405,7 @@ class ExpenseHistoryScreen extends ConsumerWidget {
                                 Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: color.withOpacity(0.1),
+                                    color: color.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Icon(_categoryIcon(expense.category), color: color, size: 18),
@@ -431,7 +431,7 @@ class ExpenseHistoryScreen extends ConsumerWidget {
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                             decoration: BoxDecoration(
-                                              color: color.withOpacity(0.1),
+                                              color: color.withValues(alpha: 0.1),
                                               borderRadius: BorderRadius.circular(4),
                                             ),
                                             child: Text(

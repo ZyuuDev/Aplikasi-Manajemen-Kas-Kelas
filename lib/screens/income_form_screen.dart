@@ -78,11 +78,11 @@ class _IncomeFormScreenState extends ConsumerState<IncomeFormScreen> {
           children: [
             // Informational Card
             Card(
-              color: AppTheme.primaryEmerald.withOpacity(0.05),
+              color: AppTheme.primaryEmerald.withValues(alpha: 0.05),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: AppTheme.primaryEmerald.withOpacity(0.15),
+                  color: AppTheme.primaryEmerald.withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),

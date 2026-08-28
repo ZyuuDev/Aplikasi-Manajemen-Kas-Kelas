@@ -204,9 +204,9 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
 
   Future<void> _launchWhatsApp(Student student, int debt, int debtWeeks, String className) async {
     final message = 
-      "Halo ${student.name}, ini pengingat dari Bendahara Kelas $className. 📢\n\n"
+      "Halo ${student.name}, ini pengingat dari Bendahara Kelas $className.\n\n"
       "Kamu saat ini memiliki sisa tunggakan uang kas kelas sebesar *${_formatRupiah(debt)}* (selama *$debtWeeks minggu* berjalan).\n\n"
-      "Mohon untuk segera melakukan pembayaran ke bendahara kelas ya. Terima kasih! 🙏";
+      "Mohon untuk segera melakukan pembayaran ke bendahara kelas ya. Terima kasih.";
 
     // Standard url encoding for message
     final encodedMessage = Uri.encodeComponent(message);
@@ -342,16 +342,18 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                   ),
                   Expanded(
                     child: _buildFilterTab(
-                      label: '🥇 Teladan ($totalLunas)',
+                      label: 'Teladan ($totalLunas)',
                       value: 'lunas',
                       activeColor: AppTheme.primaryEmerald,
+                      icon: LucideIcons.award,
                     ),
                   ),
                   Expanded(
                     child: _buildFilterTab(
-                      label: '⚠️ Nunggak ($totalNunggak)',
+                      label: 'Nunggak ($totalNunggak)',
                       value: 'nunggak',
                       activeColor: AppTheme.destructiveRose,
+                      icon: LucideIcons.alertTriangle,
                     ),
                   ),
                 ],
@@ -406,8 +408,8 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                           shape: const Border(), // Removes standard line border on open
                           leading: CircleAvatar(
                             backgroundColor: isLunas 
-                                ? AppTheme.primaryEmerald.withOpacity(0.1) 
-                                : AppTheme.destructiveRose.withOpacity(0.1),
+                                ? AppTheme.primaryEmerald.withValues(alpha: 0.1) 
+                                : AppTheme.destructiveRose.withValues(alpha: 0.1),
                             foregroundColor: isLunas ? AppTheme.primaryEmerald : AppTheme.destructiveRose,
                             child: Text(
                               student.name[0].toUpperCase(),
@@ -426,8 +428,8 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                             padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
                             decoration: BoxDecoration(
                               color: isLunas 
-                                  ? AppTheme.primaryEmerald.withOpacity(0.1) 
-                                  : AppTheme.destructiveRose.withOpacity(0.1),
+                                  ? AppTheme.primaryEmerald.withValues(alpha: 0.1) 
+                                  : AppTheme.destructiveRose.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -488,7 +490,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                             tooltip: 'Edit Data Siswa',
                             icon: const Icon(LucideIcons.pencil, size: 16, color: Colors.blueAccent),
                             style: IconButton.styleFrom(
-                              backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                              backgroundColor: Colors.blueAccent.withValues(alpha: 0.1),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -501,7 +503,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
                             tooltip: 'Nonaktifkan Siswa',
                             icon: const Icon(LucideIcons.userX, size: 16, color: AppTheme.destructiveRose),
                             style: IconButton.styleFrom(
-                              backgroundColor: AppTheme.destructiveRose.withOpacity(0.1),
+                              backgroundColor: AppTheme.destructiveRose.withValues(alpha: 0.1),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -552,6 +554,7 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
     required String label,
     required String value,
     required Color activeColor,
+    IconData? icon,
   }) {
     final isActive = _filterStatus == value;
     return GestureDetector(
@@ -559,17 +562,30 @@ class _StudentManagementScreenState extends ConsumerState<StudentManagementScree
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6.0),
         decoration: BoxDecoration(
-          color: isActive ? activeColor.withOpacity(0.18) : Colors.transparent,
+          color: isActive ? activeColor.withValues(alpha: 0.18) : Colors.transparent,
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: isActive ? activeColor : AppTheme.textMuted,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(
+                  icon,
+                  size: 13,
+                  color: isActive ? activeColor : AppTheme.textMuted,
+                ),
+                const SizedBox(width: 4),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: isActive ? activeColor : AppTheme.textMuted,
+                ),
+              ),
+            ],
           ),
         ),
       ),

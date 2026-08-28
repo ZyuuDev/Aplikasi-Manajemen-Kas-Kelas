@@ -37,12 +37,14 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal mengakses kamera/galeri: $e'),
-          backgroundColor: AppTheme.destructiveRose,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal mengakses kamera/galeri: $e'),
+            backgroundColor: AppTheme.destructiveRose,
+          ),
+        );
+      }
     }
   }
 
@@ -131,8 +133,8 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
               Container(
                 padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
-                  color: AppTheme.destructiveRose.withOpacity(0.05),
-                  border: Border.all(color: AppTheme.destructiveRose.withOpacity(0.15)),
+                  color: AppTheme.destructiveRose.withValues(alpha: 0.05),
+                  border: Border.all(color: AppTheme.destructiveRose.withValues(alpha: 0.15)),
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 child: const Row(
@@ -253,7 +255,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
                               top: 8,
                               right: 8,
                               child: CircleAvatar(
-                                backgroundColor: Colors.black.withOpacity(0.6),
+                                backgroundColor: Colors.black.withValues(alpha: 0.6),
                                 radius: 14,
                                 child: IconButton(
                                   padding: EdgeInsets.zero,

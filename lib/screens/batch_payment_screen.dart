@@ -115,7 +115,7 @@ class _BatchPaymentScreenState extends ConsumerState<BatchPaymentScreen> {
                       Expanded(
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            backgroundColor: !_useCustomAmount ? AppTheme.primaryEmerald.withOpacity(0.1) : Colors.transparent,
+                            backgroundColor: !_useCustomAmount ? AppTheme.primaryEmerald.withValues(alpha: 0.1) : Colors.transparent,
                             side: BorderSide(
                               color: !_useCustomAmount ? AppTheme.primaryEmerald : AppTheme.darkBorder,
                             ),
@@ -128,7 +128,7 @@ class _BatchPaymentScreenState extends ConsumerState<BatchPaymentScreen> {
                       Expanded(
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            backgroundColor: _useCustomAmount ? AppTheme.primaryEmerald.withOpacity(0.1) : Colors.transparent,
+                            backgroundColor: _useCustomAmount ? AppTheme.primaryEmerald.withValues(alpha: 0.1) : Colors.transparent,
                             side: BorderSide(
                               color: _useCustomAmount ? AppTheme.primaryEmerald : AppTheme.darkBorder,
                             ),
@@ -319,7 +319,7 @@ class _BatchPaymentScreenState extends ConsumerState<BatchPaymentScreen> {
   Widget _buildWeekOption(int count) {
     final isSelected = _weeksCount == count;
     return ChoiceChip(
-      selectedColor: AppTheme.primaryEmerald.withOpacity(0.2),
+      selectedColor: AppTheme.primaryEmerald.withValues(alpha: 0.2),
       checkmarkColor: AppTheme.primaryEmerald,
       label: Text(
         '$count Minggu',

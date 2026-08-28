@@ -345,7 +345,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     gradient: LinearGradient(
-                      colors: [AppTheme.darkCard, AppTheme.primaryEmerald.withOpacity(0.05)],
+                      colors: [AppTheme.darkCard, AppTheme.primaryEmerald.withValues(alpha: 0.05)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -485,7 +485,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             Container(
                               padding: const EdgeInsets.all(8.0),
                               decoration: BoxDecoration(
-                                color: AppTheme.accentAmber.withOpacity(0.1),
+                                color: AppTheme.accentAmber.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: const Icon(
@@ -549,13 +549,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: _leaderboardTab == "fame"
-                                  ? AppTheme.primaryEmerald.withOpacity(0.12)
-                                  : AppTheme.destructiveRose.withOpacity(0.12),
+                                  ? AppTheme.primaryEmerald.withValues(alpha: 0.12)
+                                  : AppTheme.destructiveRose.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: _leaderboardTab == "fame"
-                                    ? AppTheme.primaryEmerald.withOpacity(0.3)
-                                    : AppTheme.destructiveRose.withOpacity(0.3),
+                                    ? AppTheme.primaryEmerald.withValues(alpha: 0.3)
+                                    : AppTheme.destructiveRose.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Text(
@@ -587,14 +587,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(vertical: 7),
                                   decoration: BoxDecoration(
-                                    color: _leaderboardTab == "fame" ? AppTheme.primaryEmerald.withOpacity(0.2) : Colors.transparent,
+                                    color: _leaderboardTab == "fame" ? AppTheme.primaryEmerald.withValues(alpha: 0.2) : Colors.transparent,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Center(
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Text('🥇 ', style: TextStyle(fontSize: 11)),
+                                        Icon(
+                                          LucideIcons.award,
+                                          size: 13,
+                                          color: _leaderboardTab == "fame" ? AppTheme.primaryEmerald : AppTheme.textMuted,
+                                        ),
+                                        const SizedBox(width: 4),
                                         Text(
                                           'Teladan (${starStudents.length})',
                                           style: TextStyle(
@@ -615,14 +620,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(vertical: 7),
                                   decoration: BoxDecoration(
-                                    color: _leaderboardTab == "debtors" ? AppTheme.destructiveRose.withOpacity(0.2) : Colors.transparent,
+                                    color: _leaderboardTab == "debtors" ? AppTheme.destructiveRose.withValues(alpha: 0.2) : Colors.transparent,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Center(
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Text('⚠️ ', style: TextStyle(fontSize: 11)),
+                                        Icon(
+                                          LucideIcons.alertTriangle,
+                                          size: 13,
+                                          color: _leaderboardTab == "debtors" ? AppTheme.destructiveRose : AppTheme.textMuted,
+                                        ),
+                                        const SizedBox(width: 4),
                                         Text(
                                           'Tunggakan (${debtorStudents.length})',
                                           style: TextStyle(
@@ -655,30 +665,57 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemCount: starStudents.take(5).length,
-                                separatorBuilder: (_, __) => const Divider(color: AppTheme.darkBorder, height: 1),
+                                separatorBuilder: (_, index) => const Divider(color: AppTheme.darkBorder, height: 1),
                                 itemBuilder: (context, index) {
                                   final student = starStudents[index];
-                                  final medal = index == 0 ? "🥇" : index == 1 ? "🥈" : index == 2 ? "🥉" : "${index + 1}";
-
-                                  return ListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    leading: CircleAvatar(
+                                  Widget leadingWidget;
+                                  if (index == 0) {
+                                    leadingWidget = CircleAvatar(
                                       radius: 16,
-                                      backgroundColor: AppTheme.primaryEmerald.withOpacity(0.15),
+                                      backgroundColor: const Color(0xFFF59E0B).withValues(alpha: 0.2),
+                                      child: const Icon(LucideIcons.trophy, size: 15, color: Color(0xFFF59E0B)),
+                                    );
+                                  } else if (index == 1) {
+                                    leadingWidget = CircleAvatar(
+                                      radius: 16,
+                                      backgroundColor: const Color(0xFF94A3B8).withValues(alpha: 0.2),
+                                      child: const Icon(LucideIcons.medal, size: 15, color: Color(0xFF94A3B8)),
+                                    );
+                                  } else if (index == 2) {
+                                    leadingWidget = CircleAvatar(
+                                      radius: 16,
+                                      backgroundColor: const Color(0xFFD97706).withValues(alpha: 0.2),
+                                      child: const Icon(LucideIcons.award, size: 15, color: Color(0xFFD97706)),
+                                    );
+                                  } else {
+                                    leadingWidget = CircleAvatar(
+                                      radius: 16,
+                                      backgroundColor: AppTheme.primaryEmerald.withValues(alpha: 0.15),
                                       child: Text(
-                                        medal,
-                                        style: TextStyle(
-                                          fontSize: index < 3 ? 14 : 11,
+                                        '${index + 1}',
+                                        style: const TextStyle(
+                                          fontSize: 11,
                                           fontWeight: FontWeight.bold,
                                           color: AppTheme.primaryEmerald,
                                         ),
                                       ),
-                                    ),
+                                    );
+                                  }
+
+                                  return ListTile(
+                                    contentPadding: EdgeInsets.zero,
+                                    leading: leadingWidget,
                                     title: Text(
                                       student.name,
                                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
                                     ),
-                                    subtitle: const Text('✓ Lunas Kas Semester Ini', style: TextStyle(fontSize: 10, color: AppTheme.primaryEmerald)),
+                                    subtitle: const Row(
+                                      children: [
+                                        Icon(LucideIcons.check, size: 11, color: AppTheme.primaryEmerald),
+                                        SizedBox(width: 4),
+                                        Text('Lunas Kas Semester Ini', style: TextStyle(fontSize: 10, color: AppTheme.primaryEmerald)),
+                                      ],
+                                    ),
                                     trailing: Text(
                                       _formatRupiah(student.totalPaid),
                                       style: const TextStyle(fontFamily: 'monospace', fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.primaryEmerald),
@@ -698,7 +735,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemCount: debtorStudents.take(5).length,
-                                separatorBuilder: (_, __) => const Divider(color: AppTheme.darkBorder, height: 1),
+                                separatorBuilder: (_, index) => const Divider(color: AppTheme.darkBorder, height: 1),
                                 itemBuilder: (context, index) {
                                   final student = debtorStudents[index];
                                   final debt = state.getStudentDebt(student);
@@ -708,7 +745,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                     contentPadding: EdgeInsets.zero,
                                     leading: CircleAvatar(
                                       radius: 16,
-                                      backgroundColor: AppTheme.destructiveRose.withOpacity(0.15),
+                                      backgroundColor: AppTheme.destructiveRose.withValues(alpha: 0.15),
                                       child: Text(
                                         '${index + 1}',
                                         style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.destructiveRose),
@@ -917,8 +954,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
                           color: isIncome
-                              ? AppTheme.primaryEmerald.withOpacity(0.1)
-                              : AppTheme.destructiveRose.withOpacity(0.1),
+                              ? AppTheme.primaryEmerald.withValues(alpha: 0.1)
+                              : AppTheme.destructiveRose.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -1042,7 +1079,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Icon(

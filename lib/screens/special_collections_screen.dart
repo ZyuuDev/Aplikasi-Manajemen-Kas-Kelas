@@ -253,8 +253,8 @@ class _SpecialCollectionsScreenState
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
                                       color: isPerfect
-                                          ? AppTheme.primaryEmerald.withOpacity(0.15)
-                                          : AppTheme.accentAmber.withOpacity(0.15),
+                                          ? AppTheme.primaryEmerald.withValues(alpha: 0.15)
+                                          : AppTheme.accentAmber.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Icon(
@@ -314,13 +314,13 @@ class _SpecialCollectionsScreenState
                                         horizontal: 10, vertical: 5),
                                     decoration: BoxDecoration(
                                       color: isPerfect
-                                          ? AppTheme.primaryEmerald.withOpacity(0.15)
-                                          : AppTheme.accentAmber.withOpacity(0.15),
+                                          ? AppTheme.primaryEmerald.withValues(alpha: 0.15)
+                                          : AppTheme.accentAmber.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
                                         color: isPerfect
-                                            ? AppTheme.primaryEmerald.withOpacity(0.3)
-                                            : AppTheme.accentAmber.withOpacity(0.3),
+                                            ? AppTheme.primaryEmerald.withValues(alpha: 0.3)
+                                            : AppTheme.accentAmber.withValues(alpha: 0.3),
                                       ),
                                     ),
                                     child: Text(
@@ -407,7 +407,7 @@ class _SpecialCollectionsScreenState
                                         color: AppTheme.destructiveRose, size: 18),
                                     style: IconButton.styleFrom(
                                       backgroundColor:
-                                          AppTheme.destructiveRose.withOpacity(0.1),
+                                          AppTheme.destructiveRose.withValues(alpha: 0.1),
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(10)),
@@ -436,7 +436,7 @@ class _SpecialCollectionsScreenState
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.primaryEmerald.withOpacity(0.08),
+                color: AppTheme.primaryEmerald.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -527,7 +527,7 @@ class _ChecklistScreenState extends ConsumerState<_ChecklistScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Status pembayaran berhasil disimpan! ✓'),
+            content: Text('Status pembayaran berhasil disimpan!'),
             backgroundColor: AppTheme.primaryEmerald,
           ),
         );
@@ -618,8 +618,7 @@ class _ChecklistScreenState extends ConsumerState<_ChecklistScreen> {
                             ),
                           const SizedBox(height: 4),
                           Text(
-                            _formatRupiah(widget.collection.amount) +
-                                ' / siswa',
+                            '${_formatRupiah(widget.collection.amount)} / siswa',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -749,12 +748,12 @@ class _ChecklistScreenState extends ConsumerState<_ChecklistScreen> {
                     margin: const EdgeInsets.only(bottom: 6),
                     decoration: BoxDecoration(
                       color: isPaid
-                          ? AppTheme.primaryEmerald.withOpacity(0.08)
+                          ? AppTheme.primaryEmerald.withValues(alpha: 0.08)
                           : AppTheme.darkCard,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
                         color: isPaid
-                            ? AppTheme.primaryEmerald.withOpacity(0.3)
+                            ? AppTheme.primaryEmerald.withValues(alpha: 0.3)
                             : AppTheme.darkBorder,
                         width: isPaid ? 1.5 : 1,
                       ),
@@ -780,7 +779,7 @@ class _ChecklistScreenState extends ConsumerState<_ChecklistScreen> {
                           CircleAvatar(
                             radius: 18,
                             backgroundColor: isPaid
-                                ? AppTheme.primaryEmerald.withOpacity(0.2)
+                                ? AppTheme.primaryEmerald.withValues(alpha: 0.2)
                                 : AppTheme.darkMuted,
                             foregroundColor: isPaid
                                 ? AppTheme.primaryEmerald
@@ -828,12 +827,12 @@ class _ChecklistScreenState extends ConsumerState<_ChecklistScreen> {
                                         horizontal: 10, vertical: 5),
                                     decoration: BoxDecoration(
                                       color: AppTheme.primaryEmerald
-                                          .withOpacity(0.15),
+                                          .withValues(alpha: 0.15),
                                       borderRadius:
                                           BorderRadius.circular(20),
                                       border: Border.all(
                                           color: AppTheme.primaryEmerald
-                                              .withOpacity(0.3)),
+                                              .withValues(alpha: 0.3)),
                                     ),
                                     child: const Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -920,9 +919,9 @@ class _ChecklistScreenState extends ConsumerState<_ChecklistScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
